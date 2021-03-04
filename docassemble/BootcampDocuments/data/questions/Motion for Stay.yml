@@ -1,0 +1,339 @@
+include:
+  - docassemble.AssemblyLine:al_package.yml
+  - docassemble.MassAccess:massaccess.yml
+---
+comment: |
+  The metadata section controls the tab title and saved interview title. You can delete this section if you include this YAML file in another YAML file.
+metadata:
+  title: |
+    Motion for Stay Cleveland Housing Court
+  short title: |
+    Motion for Stay
+  tags:
+    - HO-00-00-00-00
+---
+comment: |
+  This section is used by AssemblyLine to control how some of the questions work.
+mandatory: True
+code: |
+  interview_metadata # make sure we initialize the object
+  if not defined("interview_metadata['motionforstayCLEHousingCourt']"):
+    interview_metadata.initializeObject('motionforstayCLEHousingCourt')
+  interview_metadata['motionforstayCLEHousingCourt'].update({
+    'title': 'Motion for Stay Cleveland Housing Court',
+    'short title': 'Motion for Stay',
+    'description': 'Motion for Stay Cleveland Housing Court',
+    'original_form': 'https://clevelandmunicipalcourt.org/docs/default-source/housing-court-documents/housing-court-forms/motion-for-stay36e1246cc4f76bf3972fff0000463da2.pdf?sfvrsn=a164f3d_2',
+    'allowed courts': [
+    ],
+    'categories': [
+      'HO-00-00-00-00',
+    ],
+    'logic block variable': 'motionforstayCLEHousingCourt',
+    'attachment block variable': 'motionforstayCLEHousingCourt_attachment',
+    'typical role': 'defendant',
+  })
+---
+code: |
+  interview_short_title = 'File a Motion for Stay'
+---
+code: |
+  al_form_type = 'existing_case'
+---
+features:
+  navigation: True
+---
+sections:
+  - review_motionforstayCLEHousingCourt: Review your answers
+---
+objects:
+  - plaintiffs: ALPeopleList.using(there_are_any=True)
+  - users: ALPeopleList.using(there_are_any=True)
+  - defendants: ALPeopleList.using(there_are_any=True)
+
+---
+mandatory: True
+id: main_order_motionforstayCLEHousingCourt
+code: |
+  # Controls the flow of the basic building blocks of the
+  # interview. To use this interview in another interview
+  # delete the `mandatory: True` specifier or this whole block.
+  al_intro_screen  # Organization intro screen/splash screen
+  # Introduction to this specific interview
+  motionforstayCLEHousingCourt_intro
+  # Trigger the whole interview order block to control question order
+  interview_order_motionforstayCLEHousingCourt
+  signature_date
+  # Save (anonymized) interview statistics.
+  store_variables_snapshot(data={'zip': users[0].address.zip})
+  motionforstayCLEHousingCourt_preview_question  # Pre-canned preview screen
+  basic_questions_signature_flow
+  users[0].signature
+  motionforstayCLEHousingCourt_download
+---
+id: interview_order_motionforstayCLEHousingCourt
+code: |
+  # This is a placeholder to control order of questions in this interview
+  # Set the allowed courts for this interview
+  allowed_courts = interview_metadata["motionforstayCLEHousingCourt"]["allowed courts"]
+  nav.set_section('review_motionforstayCLEHousingCourt')
+  user_role = 'defendant'
+  case_number
+  reasons_for_stay
+  previous_motion_filed_name
+  set_progress(9.09)
+  motion_sending_method
+  # Set the answer file name.
+  set_parts(subtitle=str(users))
+  plaintiffs.gather()
+  set_progress(18.18)
+  plaintiffs[0].address.address
+  set_progress(27.27)
+  plaintiffs[0].phone_number
+  defendants.gather()
+  set_progress(36.36)
+  defendants[0].address.address
+  set_progress(45.45)
+  defendants[0].phone_number
+  interview_order_motionforstayCLEHousingCourt = True
+---
+comment: |
+  This question is used to introduce your interview. Please customize
+id: Motion for Stay Cleveland Housing Court
+continue button field: motionforstayCLEHousingCourt_intro
+question: |
+  Motion for Stay Cleveland Housing Court
+subquestion: |
+  Motion for Stay Cleveland Housing Court
+---
+id: Review your form before you sign it
+continue button field: motionforstayCLEHousingCourt_preview_question
+question: |
+  Review your form before you sign it
+subquestion: |
+  Here is a preview of the form you'll sign on the next page.
+
+   ${ al_user_bundle.as_pdf(key='preview') }
+
+  Remember to come back to this window to continue and sign your form.
+---
+id: Case Information
+question: |
+  Case Information
+subquestion: |
+  Please provide the basic information about your case.
+fields:
+  - 'Case number': case_number
+    maxlength: 26
+  - 'Is plaintiff': is_plaintiff
+    datatype: yesno
+  - 'Is defendant': is_defendant
+    datatype: yesno
+---
+id: Reasons for Stay
+question: |
+  Reasons for Stay
+subquestion: |
+  Please state why you are filing this motion.
+fields:
+  - 'Reasons for stay': reasons_for_stay
+    input type: area
+    maxlength: 180
+---
+id: Did you file a previous motion
+question: |
+  Did you file a previous motion?
+fields:
+  - 'Name of previous motion filed': previous_motion_filed_name
+    maxlength: 84
+  - 'Date previous motion filed': previous_motion_filed_date
+    datatype: date
+---
+id: Service Clause
+question: |
+  Service Clause
+fields:
+  - 'Motion sending method': motion_sending_method
+    maxlength: 22
+  - 'Sent by mail': sent_by_mail
+    datatype: yesno
+  - 'Sent by other': sent_by_other
+    datatype: yesno
+  - 'Sent to plaintiff': sent_to_plaintiff
+    datatype: yesno
+  - 'Sent to defendant': sent_to_defendant
+    datatype: yesno
+  - 'Month motion sent': month_motion_sent
+    datatype: integer
+    min: 0
+  - 'Day motion sent': date_motion_sent
+    datatype: integer
+    min: 0
+  - 'Year motion sent': year_motion_sent
+    datatype: integer
+    min: 0
+---
+progress: 100
+id: download
+event: motionforstayCLEHousingCourt_download
+question: |
+  Your form is ready to download.
+subquestion: |
+  Thank you ${users}. Your form is ready to download and deliver.
+
+  Below is a preview of your form.
+
+  ${ al_user_bundle.download_list_html() }
+
+  ${ al_user_bundle.send_button_html() }
+---
+objects:
+  - motionforstayCLEHousingCourt_attachment: ALDocument.using(title="Motion for Stay Cleveland Housing Court", filename="motion-for-stay-CLE-Housing-Court", enabled=True, has_addendum=False)
+---
+objects:
+  - al_user_bundle: ALDocumentBundle.using(elements=[motionforstayCLEHousingCourt_attachment], filename="motion-for-stay-CLE-Housing-Court.pdf", title="All forms to download for your records")
+  - al_court_bundle: ALDocumentBundle.using(elements=[motionforstayCLEHousingCourt_attachment], filename="motion-for-stay-CLE-Housing-Court.pdf", title="All forms to download for your records")
+---
+attachment:
+    variable name: motionforstayCLEHousingCourt_attachment[i]
+    name: Motion for Stay
+    filename: Motion-for-Stay
+    skip undefined: True
+    pdf template file: motion-for-stay-CLE-Housing-Reworked.pdf
+    fields: 
+      - "plaintiff": ${ plaintiffs[0] }
+      - "plaintiff_address_street": ${ plaintiffs[0].address.address }
+      - "plaintiff_address_zip": ${ plaintiffs[0].address.zip }
+      - "plaintiff_address_city": ${ plaintiffs[0].address.city }
+      - "plaintiff_address_state": ${ plaintiffs[0].address.state }
+      - "plaintiff_phone_number": ${ plaintiffs[0].phone_number }
+      - "defendant": ${ defendants[0] }
+      - "defendant_address_street": ${ defendants[0].address.address }
+      - "defendant_address_city": ${ defendants[0].address.city }
+      - "defendant_address_state": ${ defendants[0].address.state }
+      - "defendant_address_zip": ${ defendants[0].address.zip }
+      - "defendant_phone_number": ${ defendants[0].phone_number }
+      # It's a signature: test which file version this is; leave empty unless it's the final version)
+      - "user_signature": ${ users[0].signature if i == 'final' else '' }
+      - "case_number": ${ case_number }
+      - "is_plaintiff": ${ is_plaintiff }
+      - "is_defendant": ${ is_defendant }
+      - "reasons_for_stay": ${ reasons_for_stay }
+      - "previous_motion_filed_name": ${ previous_motion_filed_name }
+      - "previous_motion_filed_date": ${ previous_motion_filed_date }
+      - "motion_sending_method": ${ motion_sending_method }
+      - "sent_by_mail": ${ sent_by_mail }
+      - "sent_by_other": ${ sent_by_other }
+      - "sent_to_plaintiff": ${ sent_to_plaintiff }
+      - "sent_to_defendant": ${ sent_to_defendant }
+      - "month_motion_sent": ${ month_motion_sent }
+      - "date_motion_sent": ${ date_motion_sent }
+      - "year_motion_sent": ${ year_motion_sent }
+      # It's a signature: test which file version this is; leave empty unless it's the final version)
+      - "service_signature": ${ service_signature if i == 'final' else '' }
+---
+id: motionforstayCLEHousingCourt review screen
+event: review_motionforstayCLEHousingCourt
+question: |
+  Review Screen
+subquestion: |
+  Edit your answers below
+review: 
+  - Edit: case_number
+    button: |
+      **Case number**:
+      ${ case_number }
+  - Edit: is_plaintiff
+    button: |
+      **Is plaintiff**:
+      ${ word(yesno(is_plaintiff)) }
+  - Edit: is_defendant
+    button: |
+      **Is defendant**:
+      ${ word(yesno(is_defendant)) }
+  - Edit: reasons_for_stay
+    button: |
+      **Reasons for stay**:
+      > ${ single_paragraph(reasons_for_stay) }
+  - Edit: previous_motion_filed_name
+    button: |
+      **Name of previous motion filed**:
+      ${ previous_motion_filed_name }
+  - Edit: previous_motion_filed_date
+    button: |
+      **Date previous motion filed**:
+      ${ previous_motion_filed_date }
+  - Edit: motion_sending_method
+    button: |
+      **Motion sending method**:
+      ${ motion_sending_method }
+  - Edit: sent_by_mail
+    button: |
+      **Sent by mail**:
+      ${ word(yesno(sent_by_mail)) }
+  - Edit: sent_by_other
+    button: |
+      **Sent by other**:
+      ${ word(yesno(sent_by_other)) }
+  - Edit: sent_to_plaintiff
+    button: |
+      **Sent to plaintiff**:
+      ${ word(yesno(sent_to_plaintiff)) }
+  - Edit: sent_to_defendant
+    button: |
+      **Sent to defendant**:
+      ${ word(yesno(sent_to_defendant)) }
+  - Edit: month_motion_sent
+    button: |
+      **Month motion sent**:
+      ${ month_motion_sent }
+  - Edit: date_motion_sent
+    button: |
+      **Day motion sent**:
+      ${ date_motion_sent }
+  - Edit: year_motion_sent
+    button: |
+      **Year motion sent**:
+      ${ year_motion_sent }
+  - Edit: plaintiffs[0].name.first
+    button: |
+      **plaintiffs**
+
+      % for my_var in plaintiffs:
+        * ${ my_var }
+      % endfor
+    # NOTE: a question block with 'plaintiffs.revisit'
+    # lets the user edit all of the items at once
+  - Edit: plaintiffs[0].address.address
+    button: |
+      **plaintiffs[0].address.address**:
+      ${ plaintiffs[0].address.address }
+  - Edit: plaintiffs[0].phone_number
+    button: |
+      **plaintiffs[0].phone_number**:
+      ${ plaintiffs[0].phone_number }
+  - Edit: defendants[0].name.first
+    button: |
+      **defendants**
+
+      % for my_var in defendants:
+        * ${ my_var }
+      % endfor
+    # NOTE: a question block with 'defendants.revisit'
+    # lets the user edit all of the items at once
+  - Edit: defendants[0].address.address
+    button: |
+      **defendants[0].address.address**:
+      ${ defendants[0].address.address }
+  - Edit: defendants[0].phone_number
+    button: |
+      **defendants[0].phone_number**:
+      ${ defendants[0].phone_number }
+  - Edit: users[0].signature
+    button: |
+      **users[0].signature**:
+      ${ users[0].signature }
+  - Edit: service_signature
+    button: |
+      **service_signature**:
+      ${ service_signature }
